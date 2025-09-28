@@ -1,48 +1,114 @@
-# Serveur Web Multithreadé
+# Serveur Web Multi-threadé Java
 
-Ce projet implémente un serveur web HTTP simple utilisant des techniques de programmation concurrente en Java.
+Un serveur web HTTP simple implémenté en Java utilisant les sockets TCP/IP, la programmation multi-threadée et un pool de threads pour gérer les requêtes concurrentes.
 
-## Concepts Démontrés
+## 🎯 Concepts utilisés
 
-### 1. Programmation Réseau
-- Utilisation des sockets pour la communication réseau (`ServerSocket`, `Socket`)
-- Implémentation basique du protocole HTTP
-- Gestion des connexions client-serveur
+### **Programmation réseau avec Sockets**
+- **Socket TCP/IP** : Établit des connexions HTTP entre le serveur et les clients web
+- **ServerSocket** : Écoute les connexions entrantes sur le port 8080
+- **OutputStream/BufferedReader** : Gestion des flux HTTP pour les requêtes et réponses
 
-### 2. Programmation Concurrente
-- Utilisation des threads pour gérer plusieurs clients simultanément
-- Implémentation d'un pool de threads avec `ExecutorService`
-- Utilisation de l'interface `Runnable` pour définir des tâches exécutables
+### **Pool de Threads (Thread Pool)**
+- **ExecutorService** : Gère un pool fixe de 10 threads pour traiter les requêtes
+- **Executors.newFixedThreadPool(10)** : Limite le nombre de threads actifs et réutilise les threads
+- **Performance optimisée** : Évite la création/destruction constante de threads
 
-### 3. Gestion des Ressources
-- Utilisation de blocs try-with-resources pour garantir la fermeture des ressources
-- Gestion appropriée des exceptions
-- Fermeture propre des connexions client
+### **Protocole HTTP**
+- **Parsing des requêtes HTTP** : Lecture des headers et du corps de la requête
+- **Réponse HTTP standardisée** : Status code, headers et contenu
+- **Content-Type et Content-Length** : Headers appropriés pour la réponse
 
-### 4. Architecture Modulaire
-- Séparation des responsabilités entre différentes classes:
-  - `MultithreadedWebServer`: gestion du serveur et acceptation des connexions
-  - `ClientHandler`: traitement des requêtes client individuelles
-  - `MainTest`: point d'entrée de l'application
+### **Architecture Multi-threadée**
+- **Thread principal** : Accepte les connexions en continu
+- **Threads workers** : Chaque requête HTTP est traitée dans un thread du pool
+- **Traitement concurrent** : Plusieurs requêtes peuvent être traitées simultanément
 
-## Comment Exécuter
+### **Gestion des ressources**
+- **Try-with-resources** : Fermeture automatique des sockets et flux
+- **Gestion des exceptions** : Traitement propre des erreurs de connexion et I/O
+- **Thread.join()** : Attente propre de la fin du thread serveur
 
-1. Compilez le projet avec votre IDE ou via la ligne de commande
-2. Exécutez la classe `MainTest`
-3. Le serveur démarrera sur le port 8080
-4. Accédez au serveur depuis un navigateur web en visitant `http://localhost:8080`
+## 🏗️ Architecture
 
-## Points d'Apprentissage Clés
+```
+MultithreadedWebServer
+├── Écoute sur le port 8080
+├── Pool de 10 threads workers
+└── Distribue les requêtes via ExecutorService
 
-- **Concurrence vs Parallélisme**: Ce serveur démontre comment gérer plusieurs connexions clients simultanément grâce à un pool de threads.
-- **Pattern Thread Pool**: Utilisation d'un pool de threads fixe (10 threads) pour limiter la consommation de ressources tout en permettant la concurrence.
-- **Méthodes de Référence**: Utilisation de la syntaxe `server::startServer` pour créer une référence de méthode comme tâche de thread.
-- **Gestion des E/S réseau**: Lecture et écriture de données sur les sockets réseau.
+ClientHandler (un par requête)
+├── Traite une requête HTTP complète
+├── Parse les headers HTTP
+├── Génère une réponse HTTP 200 OK
+└── Ferme la connexion
 
-## Améliorations Possibles
+MainTest
+├── Lance le serveur sur un thread dédié
+└── Attend la fin d'exécution avec join()
+```
 
-- Implémentation d'un routeur pour gérer différentes URL
-- Ajout de support pour différents types de contenu (HTML, JSON, etc.)
-- Amélioration de la gestion des erreurs et journalisation
-- Implémentation d'une gestion gracieuse de l'arrêt du serveur
-- Tests de charge pour évaluer les performances
+## 🚀 Installation et exécution
+
+### Prérequis
+- Java JDK 8 ou supérieur
+- Un navigateur web ou un outil comme curl/Postman
+
+### Compilation
+```bash
+javac *.java
+```
+
+### Exécution
+
+#### Lancer le serveur
+```bash
+java MainTest
+```
+
+Le serveur démarre automatiquement sur le port 8080.
+
+## 📝 Utilisation
+
+### Accès via navigateur
+1. **Démarrer le serveur** : `java MainTest`
+2. **Ouvrir le navigateur** : Aller à `http://localhost:8080`
+3. **Voir la réponse** : "Hello World" s'affiche dans le navigateur
+
+### Accès via curl
+```bash
+curl http://localhost:8080
+# Retourne: Hello World
+```
+
+### Test de charge
+```bash
+# Plusieurs requêtes simultanées
+for i in {1..20}; do curl http://localhost:8080 & done
+```
+
+## 🔧 Fonctionnalités
+
+- **Serveur HTTP fonctionnel** répondant aux requêtes GET
+- **Gestion de 10 connexions simultanées** grâce au pool de threads
+- **Réponse HTTP standardisée** avec headers appropriés
+- **Parsing des requêtes HTTP** (lecture des headers)
+- **Gestion propre des connexions** avec fermeture automatique
+
+## 📚 Points d'apprentissage
+
+Ce projet illustre parfaitement :
+- **Les bases du protocole HTTP** (requêtes/réponses)
+- **L'utilisation des pools de threads** pour optimiser les performances
+- **La programmation réseau** avec les sockets Java
+- **La gestion de la concurrence** sans synchronisation explicite
+- **L'architecture client-serveur** web classique
+- **Les bonnes pratiques** de gestion des ressources système
+
+## 🚀 Extensions possibles
+
+- Ajouter le support des méthodes POST, PUT, DELETE
+- Servir des fichiers statiques (HTML, CSS, JS)
+- Ajouter un système de routing
+- Implémenter le support HTTPS
+- Ajouter des logs détaillés des requêtes
